@@ -4,7 +4,7 @@ DOMAIN = "dru_fireplace"
 CONF_UNIT_ID = "unit_id"
 DEFAULT_PORT = 502
 DEFAULT_UNIT_ID = 2
-SCAN_INTERVAL = timedelta(seconds=10)
+SCAN_INTERVAL = timedelta(seconds=30)
 MIN_WRITE_INTERVAL = 10.0
 
 REG_HW_TYPE = 40000
