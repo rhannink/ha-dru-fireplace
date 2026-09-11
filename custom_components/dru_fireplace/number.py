@@ -1,5 +1,5 @@
 from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.const import PERCENTAGE, UnitOfTemperature
+from homeassistant.const import PERCENTAGE
 from .entity import DruEntity
 
 
@@ -27,35 +27,5 @@ class FlameHeight(DruEntity, NumberEntity):
         self.async_write_ha_state()
 
 
-class TemperatureSetpoint(DruEntity, NumberEntity):
-    _attr_translation_key = "temperature_setpoint_control"
-    _attr_native_min_value = 0
-    _attr_native_max_value = 65
-    _attr_native_step = 0.5
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_mode = NumberMode.BOX
-
-    def __init__(self, entry):
-        super().__init__(entry)
-        self._attr_unique_id = f"{entry.entry_id}_temperature_setpoint_control"
-
-    @property
-    def available(self):
-        return (
-            super().available
-            and self.coordinator.data.temperature_setpoint is not None
-        )
-
-    @property
-    def native_value(self):
-        return self.coordinator.data.temperature_setpoint
-
-    async def async_set_native_value(self, value):
-        if self.coordinator.data.temperature_setpoint is None:
-            raise RuntimeError("Temperature setpoint is not supported by this DRU gateway")
-        await self.device.async_set_temperature(value)
-        await self.coordinator.async_request_refresh()
-
-
 async def async_setup_entry(hass, entry, async_add_entities):
-    async_add_entities([FlameHeight(entry), TemperatureSetpoint(entry)])
+    async_add_entities([FlameHeight(entry)])
