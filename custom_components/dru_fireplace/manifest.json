@@ -1,7 +1,7 @@
 {
   "domain": "dru_fireplace",
   "name": "DRU Fireplace",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "config_flow": true,
   "dependencies": ["modbus"],
   "documentation": "https://github.com/rhannink/ha-dru-fireplace",
