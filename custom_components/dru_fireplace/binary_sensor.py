@@ -10,14 +10,14 @@ class Desc(BinarySensorEntityDescription):
 
 
 BINARY = (
-    Desc(key="fault", name="Fault", bit=STATUS_ERROR, device_class=BinarySensorDeviceClass.PROBLEM),
-    Desc(key="low_battery", name="Low battery", bit=STATUS_LOW_BATTERY, device_class=BinarySensorDeviceClass.BATTERY),
-    Desc(key="mains_fault", name="230 V fault", bit=STATUS_MAINS_FAULT, device_class=BinarySensorDeviceClass.PROBLEM),
-    Desc(key="reset_allowed", name="Reset allowed", bit=STATUS_RESET_ALLOWED),
-    Desc(key="flame_height_locked", name="Flame height locked", bit=STATUS_FLAME_HEIGHT_LOCKED),
-    Desc(key="remote_bound", name="Remote control bound", bit=STATUS_REMOTE_BOUND),
-    Desc(key="gateway_bound", name="Gateway bound", bit=STATUS_GATEWAY_BOUND),
-    Desc(key="ignition_not_allowed", name="Ignition not allowed", bit=STATUS_IGNITION_NOT_ALLOWED, device_class=BinarySensorDeviceClass.PROBLEM),
+    Desc(key="fault", translation_key="fault", bit=STATUS_ERROR, device_class=BinarySensorDeviceClass.PROBLEM),
+    Desc(key="low_battery", translation_key="low_battery", bit=STATUS_LOW_BATTERY, device_class=BinarySensorDeviceClass.BATTERY),
+    Desc(key="mains_fault", translation_key="mains_fault", bit=STATUS_MAINS_FAULT, device_class=BinarySensorDeviceClass.PROBLEM),
+    Desc(key="reset_allowed", translation_key="reset_allowed", bit=STATUS_RESET_ALLOWED),
+    Desc(key="flame_height_locked", translation_key="flame_height_locked", bit=STATUS_FLAME_HEIGHT_LOCKED),
+    Desc(key="remote_bound", translation_key="remote_bound", bit=STATUS_REMOTE_BOUND),
+    Desc(key="gateway_bound", translation_key="gateway_bound", bit=STATUS_GATEWAY_BOUND),
+    Desc(key="ignition_not_allowed", translation_key="ignition_not_allowed", bit=STATUS_IGNITION_NOT_ALLOWED, device_class=BinarySensorDeviceClass.PROBLEM),
 )
 
 
