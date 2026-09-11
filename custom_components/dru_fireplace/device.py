@@ -1,11 +1,23 @@
 """DRU fireplace Modbus protocol wrapper."""
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from time import monotonic
+
 from modbus_connection import ModbusUnit
 
-from .const import MIN_WRITE_INTERVAL, REG_ACTION, REG_FLAME_HEIGHT, REG_HW_TYPE, REG_RF_LAST_SEEN, REG_STATUS, REG_TEMP_SETPOINT
+from .const import (
+    MIN_WRITE_INTERVAL,
+    REG_ACTION,
+    REG_FLAME_HEIGHT,
+    REG_HW_TYPE,
+    REG_RF_LAST_SEEN,
+    REG_STATUS,
+    REG_TEMP_SETPOINT,
+)
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -19,7 +31,7 @@ class DruData:
     gateway_rssi: float
     dfgt_rssi: float
     room_temperature: float
-    temperature_setpoint: float
+    temperature_setpoint: float | None
 
     def status_bit(self, bit: int) -> bool:
         return bool(self.status & (1 << bit))
@@ -34,18 +46,43 @@ class DruFireplaceDevice:
         self.unit = unit
         self._lock = asyncio.Lock()
         self._last_write = 0.0
+        self._setpoint_unsupported_logged = False
 
     async def async_read(self) -> DruData:
         ident = await self.unit.read_holding_registers(REG_HW_TYPE, 2)
         radio = await self.unit.read_holding_registers(REG_RF_LAST_SEEN, 2)
         live = await self.unit.read_holding_registers(REG_STATUS, 5)
-        setpoint = await self.unit.read_holding_registers(REG_TEMP_SETPOINT, 1)
+
+        temperature_setpoint = None
+        try:
+            setpoint = await self.unit.read_holding_registers(REG_TEMP_SETPOINT, 1)
+        except Exception as err:
+            # Register 40250 is optional on older DRU/Honeywell gateways.  A gateway
+            # may answer with Modbus exception 0x05 when temperature control is not
+            # available.  This must not make all other fireplace entities unavailable.
+            if not self._setpoint_unsupported_logged:
+                _LOGGER.info(
+                    "DRU temperature setpoint register %s is unavailable: %s",
+                    REG_TEMP_SETPOINT,
+                    err,
+                )
+                self._setpoint_unsupported_logged = True
+        else:
+            if setpoint:
+                temperature_setpoint = setpoint[0] / 10.0
+            self._setpoint_unsupported_logged = False
+
         return DruData(
-            hw_type=ident[0], sw_version=ident[1],
-            rf_last_seen=radio[0], rf_status=radio[1], status=live[0],
-            error_code=live[1], gateway_rssi=live[2] * -0.5,
-            dfgt_rssi=live[3] * -0.5, room_temperature=live[4] / 10.0,
-            temperature_setpoint=setpoint[0] / 10.0,
+            hw_type=ident[0],
+            sw_version=ident[1],
+            rf_last_seen=radio[0],
+            rf_status=radio[1],
+            status=live[0],
+            error_code=live[1],
+            gateway_rssi=live[2] * -0.5,
+            dfgt_rssi=live[3] * -0.5,
+            room_temperature=live[4] / 10.0,
+            temperature_setpoint=temperature_setpoint,
         )
 
     async def _write(self, address: int, value: int) -> None:
