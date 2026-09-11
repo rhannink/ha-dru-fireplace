@@ -32,6 +32,14 @@ class DruSensor(DruEntity, SensorEntity):
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
 
     @property
+    def available(self):
+        if not super().available:
+            return False
+        if self.entity_description.key == "temperature_setpoint":
+            return self.coordinator.data.temperature_setpoint is not None
+        return True
+
+    @property
     def native_value(self):
         return self.entity_description.value_fn(self.coordinator.data)
 
