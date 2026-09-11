@@ -13,11 +13,8 @@ class Desc(SwitchEntityDescription):
 
 
 SWITCHES = (
-    Desc(key="pilot", name="Pilot flame", bit=STATUS_PILOT, on_action=ACTION_PILOT_ON, off_action=ACTION_PILOT_OFF),
     Desc(key="main_burner", name="Main burner", bit=STATUS_MAIN_BURNER, on_action=ACTION_MAIN_BURNER_ON, off_action=ACTION_MAIN_BURNER_OFF),
     Desc(key="second_burner", name="Second burner", bit=STATUS_SECOND_BURNER, on_action=ACTION_SECOND_BURNER_ON, off_action=ACTION_SECOND_BURNER_OFF),
-    Desc(key="light", name="Glowbed light", bit=STATUS_LIGHT, on_action=ACTION_LIGHT_ON, off_action=ACTION_LIGHT_OFF),
-    Desc(key="boost_fan", name="Boost fan", bit=STATUS_BOOST_FAN, on_action=ACTION_BOOST_FAN_ON, off_action=ACTION_BOOST_FAN_OFF),
     Desc(key="wave", name="Wave", bit=STATUS_WAVE, on_action=ACTION_WAVE_ON, off_action=ACTION_WAVE_OFF),
     Desc(key="temperature_control", name="Temperature control", bit=None, on_action=ACTION_TEMP_CONTROL_ON, off_action=ACTION_TEMP_CONTROL_OFF, temp_control=True),
 )
