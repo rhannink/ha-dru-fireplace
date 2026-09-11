@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to DRU Fireplace",
+        "description": "Enter the Modbus TCP connection details. The host/IP address can be changed here and is not hard-coded.",
+        "data": {
+          "host": "Host / IP address",
+          "port": "Port",
+          "unit_id": "Unit ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the fireplace"
+    },
+    "abort": {
+      "already_configured": "This fireplace is already configured"
+    }
+  }
+}
