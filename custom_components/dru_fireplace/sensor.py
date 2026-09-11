@@ -20,7 +20,6 @@ SENSORS = (
     Desc(key="gateway_rssi", translation_key="gateway_rssi", device_class=SensorDeviceClass.SIGNAL_STRENGTH, native_unit_of_measurement="dBm", value_fn=lambda d: d.gateway_rssi),
     Desc(key="dfgt_rssi", translation_key="dfgt_rssi", device_class=SensorDeviceClass.SIGNAL_STRENGTH, native_unit_of_measurement="dBm", value_fn=lambda d: d.dfgt_rssi),
     Desc(key="room_temperature", translation_key="room_temperature", device_class=SensorDeviceClass.TEMPERATURE, native_unit_of_measurement=UnitOfTemperature.CELSIUS, value_fn=lambda d: d.room_temperature),
-    Desc(key="temperature_setpoint", translation_key="temperature_setpoint", device_class=SensorDeviceClass.TEMPERATURE, native_unit_of_measurement=UnitOfTemperature.CELSIUS, value_fn=lambda d: d.temperature_setpoint),
     Desc(key="temperature_control_state", translation_key="temperature_control_state", value_fn=lambda d: ("not_possible", "possible", "active", "error")[d.temperature_control_state]),
 )
 
@@ -30,14 +29,6 @@ class DruSensor(DruEntity, SensorEntity):
         super().__init__(entry)
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
-
-    @property
-    def available(self):
-        if not super().available:
-            return False
-        if self.entity_description.key == "temperature_setpoint":
-            return self.coordinator.data.temperature_setpoint is not None
-        return True
 
     @property
     def native_value(self):
