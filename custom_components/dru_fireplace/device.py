@@ -14,7 +14,6 @@ from .const import (
     REG_HW_TYPE,
     REG_RF_LAST_SEEN,
     REG_STATUS,
-    REG_TEMP_SETPOINT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,7 +33,6 @@ class DruData:
     gateway_rssi: float
     dfgt_rssi: float
     room_temperature: float
-    temperature_setpoint: float | None
 
     def status_bit(self, bit: int) -> bool:
         return bool(self.status & (1 << bit))
@@ -49,8 +47,7 @@ class DruFireplaceDevice:
         self.unit = unit
         self._lock = asyncio.Lock()
         self._last_write = 0.0
-        self._setpoint_unsupported_logged = False
-        self._setpoint_invalid_logged = False
+        self._ident: tuple[int, int] | None = None
 
     async def _read_live_registers(self) -> list[int]:
         """Read live fireplace registers, retrying transient gateway failures."""
@@ -76,45 +73,21 @@ class DruFireplaceDevice:
         raise last_error
 
     async def async_read(self) -> DruData:
-        ident = await self.unit.read_holding_registers(REG_HW_TYPE, 2)
-        radio = await self.unit.read_holding_registers(REG_RF_LAST_SEEN, 2)
+        # Read the live data first, because this is the most important data and the
+        # RF-linked target can occasionally return Modbus exception 0x0B.
         live = await self._read_live_registers()
 
-        temperature_setpoint = None
-        try:
-            setpoint = await self.unit.read_holding_registers(REG_TEMP_SETPOINT, 1)
-        except Exception as err:
-            # Register 40250 is optional on older DRU/Honeywell gateways. A gateway
-            # may answer with Modbus exception 0x05 when temperature control is not
-            # available. This must not make all other fireplace entities unavailable.
-            if not self._setpoint_unsupported_logged:
-                _LOGGER.info(
-                    "DRU temperature setpoint register %s is unavailable: %s",
-                    REG_TEMP_SETPOINT,
-                    err,
-                )
-                self._setpoint_unsupported_logged = True
-        else:
-            if setpoint:
-                raw_setpoint = setpoint[0]
-                # The protocol specifies 0.5 °C steps and a scale factor of 10,
-                # therefore every valid raw setpoint must be divisible by 5.
-                # Some devices return an uninitialised/default value such as 3276;
-                # do not expose such values as a real temperature in Home Assistant.
-                if raw_setpoint % 5 == 0:
-                    temperature_setpoint = raw_setpoint / 10.0
-                    self._setpoint_invalid_logged = False
-                elif not self._setpoint_invalid_logged:
-                    _LOGGER.info(
-                        "Ignoring invalid DRU temperature setpoint raw value %s",
-                        raw_setpoint,
-                    )
-                    self._setpoint_invalid_logged = True
-            self._setpoint_unsupported_logged = False
+        # Hardware type and software version are static. Cache them after the first
+        # successful read to reduce the number of Modbus requests to the gateway.
+        if self._ident is None:
+            ident = await self.unit.read_holding_registers(REG_HW_TYPE, 2)
+            self._ident = (ident[0], ident[1])
+
+        radio = await self.unit.read_holding_registers(REG_RF_LAST_SEEN, 2)
 
         return DruData(
-            hw_type=ident[0],
-            sw_version=ident[1],
+            hw_type=self._ident[0],
+            sw_version=self._ident[1],
             rf_last_seen=radio[0],
             rf_status=radio[1],
             status=live[0],
@@ -122,7 +95,6 @@ class DruFireplaceDevice:
             gateway_rssi=live[2] * -0.5,
             dfgt_rssi=live[3] * -0.5,
             room_temperature=live[4] / 10.0,
-            temperature_setpoint=temperature_setpoint,
         )
 
     async def _write(self, address: int, value: int) -> None:
@@ -140,9 +112,3 @@ class DruFireplaceDevice:
         if not 0 <= value <= 100:
             raise ValueError("Flame height must be 0..100")
         await self._write(REG_FLAME_HEIGHT, value)
-
-    async def async_set_temperature(self, value: float) -> None:
-        raw = round(value * 10)
-        if abs(raw / 10 - value) > 1e-9 or raw % 5:
-            raise ValueError("Temperature must use 0.5 °C steps")
-        await self._write(REG_TEMP_SETPOINT, raw)
