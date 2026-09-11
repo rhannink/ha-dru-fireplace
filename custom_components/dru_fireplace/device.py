@@ -19,6 +19,9 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+LIVE_READ_RETRIES = 3
+LIVE_READ_RETRY_DELAY = 0.5
+
 
 @dataclass(slots=True)
 class DruData:
@@ -49,18 +52,41 @@ class DruFireplaceDevice:
         self._setpoint_unsupported_logged = False
         self._setpoint_invalid_logged = False
 
+    async def _read_live_registers(self) -> list[int]:
+        """Read live fireplace registers, retrying transient gateway failures."""
+        last_error: Exception | None = None
+
+        for attempt in range(1, LIVE_READ_RETRIES + 1):
+            try:
+                return await self.unit.read_holding_registers(REG_STATUS, 5)
+            except Exception as err:
+                last_error = err
+                if attempt == LIVE_READ_RETRIES:
+                    break
+
+                _LOGGER.debug(
+                    "DRU live status read failed (attempt %s/%s): %s; retrying",
+                    attempt,
+                    LIVE_READ_RETRIES,
+                    err,
+                )
+                await asyncio.sleep(LIVE_READ_RETRY_DELAY)
+
+        assert last_error is not None
+        raise last_error
+
     async def async_read(self) -> DruData:
         ident = await self.unit.read_holding_registers(REG_HW_TYPE, 2)
         radio = await self.unit.read_holding_registers(REG_RF_LAST_SEEN, 2)
-        live = await self.unit.read_holding_registers(REG_STATUS, 5)
+        live = await self._read_live_registers()
 
         temperature_setpoint = None
         try:
             setpoint = await self.unit.read_holding_registers(REG_TEMP_SETPOINT, 1)
         except Exception as err:
-            # Register 40250 is optional on older DRU/Honeywell gateways.  A gateway
+            # Register 40250 is optional on older DRU/Honeywell gateways. A gateway
             # may answer with Modbus exception 0x05 when temperature control is not
-            # available.  This must not make all other fireplace entities unavailable.
+            # available. This must not make all other fireplace entities unavailable.
             if not self._setpoint_unsupported_logged:
                 _LOGGER.info(
                     "DRU temperature setpoint register %s is unavailable: %s",
