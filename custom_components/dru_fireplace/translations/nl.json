@@ -17,5 +17,47 @@
     "abort": {
       "already_configured": "Deze haard is al geconfigureerd"
     }
+  },
+  "entity": {
+    "sensor": {
+      "hw_type": {"name": "Hardwaretype"},
+      "sw_version": {"name": "Softwareversie"},
+      "rf_last_seen": {"name": "RF laatst gezien"},
+      "rf_status": {"name": "RF-communicatiestatus"},
+      "error_code": {"name": "Foutcode"},
+      "gateway_rssi": {"name": "Gateway RSSI"},
+      "dfgt_rssi": {"name": "DFGT RSSI"},
+      "room_temperature": {"name": "Kamertemperatuur"},
+      "temperature_setpoint": {"name": "Ingestelde temperatuur"},
+      "temperature_control_state": {
+        "name": "Status temperatuurregeling",
+        "state": {
+          "not_possible": "Niet mogelijk",
+          "possible": "Mogelijk, niet actief",
+          "active": "Actief",
+          "error": "Fout"
+        }
+      }
+    },
+    "binary_sensor": {
+      "fault": {"name": "Storing"},
+      "low_battery": {"name": "Batterij bijna leeg"},
+      "mains_fault": {"name": "230 V-storing"},
+      "reset_allowed": {"name": "Reset toegestaan"},
+      "flame_height_locked": {"name": "Vlamhoogte vergrendeld"},
+      "remote_bound": {"name": "Afstandsbediening gekoppeld"},
+      "gateway_bound": {"name": "Gateway gekoppeld"},
+      "ignition_not_allowed": {"name": "Ontsteken niet toegestaan"}
+    },
+    "switch": {
+      "main_burner": {"name": "Hoofdbrander"},
+      "second_burner": {"name": "Tweede brander"},
+      "wave": {"name": "Golfstand"},
+      "temperature_control": {"name": "Temperatuurregeling"}
+    },
+    "number": {
+      "flame_height": {"name": "Vlamhoogte"},
+      "temperature_setpoint_control": {"name": "Temperatuurinstelling"}
+    }
   }
 }
