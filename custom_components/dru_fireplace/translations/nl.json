@@ -52,7 +52,7 @@
     "switch": {
       "main_burner": {"name": "Hoofdbrander"},
       "second_burner": {"name": "Tweede brander"},
-      "wave": {"name": "Golfstand"},
+      "wave": {"name": "Wave"},
       "temperature_control": {"name": "Temperatuurregeling"}
     },
     "number": {
