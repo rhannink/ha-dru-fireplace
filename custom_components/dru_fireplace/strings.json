@@ -17,5 +17,47 @@
     "abort": {
       "already_configured": "This fireplace is already configured"
     }
+  },
+  "entity": {
+    "sensor": {
+      "hw_type": {"name": "Hardware type"},
+      "sw_version": {"name": "Software version"},
+      "rf_last_seen": {"name": "RF last seen"},
+      "rf_status": {"name": "RF communication status"},
+      "error_code": {"name": "Error code"},
+      "gateway_rssi": {"name": "Gateway RSSI"},
+      "dfgt_rssi": {"name": "DFGT RSSI"},
+      "room_temperature": {"name": "Room temperature"},
+      "temperature_setpoint": {"name": "Temperature setpoint"},
+      "temperature_control_state": {
+        "name": "Temperature control state",
+        "state": {
+          "not_possible": "Not possible",
+          "possible": "Possible, not active",
+          "active": "Active",
+          "error": "Error"
+        }
+      }
+    },
+    "binary_sensor": {
+      "fault": {"name": "Fault"},
+      "low_battery": {"name": "Low battery"},
+      "mains_fault": {"name": "230 V fault"},
+      "reset_allowed": {"name": "Reset allowed"},
+      "flame_height_locked": {"name": "Flame height locked"},
+      "remote_bound": {"name": "Remote control bound"},
+      "gateway_bound": {"name": "Gateway bound"},
+      "ignition_not_allowed": {"name": "Ignition not allowed"}
+    },
+    "switch": {
+      "main_burner": {"name": "Main burner"},
+      "second_burner": {"name": "Second burner"},
+      "wave": {"name": "Wave"},
+      "temperature_control": {"name": "Temperature control"}
+    },
+    "number": {
+      "flame_height": {"name": "Flame height"},
+      "temperature_setpoint_control": {"name": "Temperature setpoint control"}
+    }
   }
 }
