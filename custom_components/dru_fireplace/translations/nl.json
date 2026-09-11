@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met DRU-haard",
+        "description": "Vul de Modbus TCP-verbindingsgegevens van de DRU-haard in. Het IP-adres is vrij configureerbaar.",
+        "data": {
+          "host": "Host / IP-adres",
+          "port": "Poort",
+          "unit_id": "Unit-ID"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan geen verbinding maken met de haard"
+    },
+    "abort": {
+      "already_configured": "Deze haard is al geconfigureerd"
+    }
+  }
+}
