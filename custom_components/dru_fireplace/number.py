@@ -40,10 +40,19 @@ class TemperatureSetpoint(DruEntity, NumberEntity):
         self._attr_unique_id = f"{entry.entry_id}_temperature_setpoint_control"
 
     @property
+    def available(self):
+        return (
+            super().available
+            and self.coordinator.data.temperature_setpoint is not None
+        )
+
+    @property
     def native_value(self):
         return self.coordinator.data.temperature_setpoint
 
     async def async_set_native_value(self, value):
+        if self.coordinator.data.temperature_setpoint is None:
+            raise RuntimeError("Temperature setpoint is not supported by this DRU gateway")
         await self.device.async_set_temperature(value)
         await self.coordinator.async_request_refresh()
 
