@@ -13,10 +13,10 @@ class Desc(SwitchEntityDescription):
 
 
 SWITCHES = (
-    Desc(key="main_burner", name="Main burner", bit=STATUS_MAIN_BURNER, on_action=ACTION_MAIN_BURNER_ON, off_action=ACTION_MAIN_BURNER_OFF),
-    Desc(key="second_burner", name="Second burner", bit=STATUS_SECOND_BURNER, on_action=ACTION_SECOND_BURNER_ON, off_action=ACTION_SECOND_BURNER_OFF),
-    Desc(key="wave", name="Wave", bit=STATUS_WAVE, on_action=ACTION_WAVE_ON, off_action=ACTION_WAVE_OFF),
-    Desc(key="temperature_control", name="Temperature control", bit=None, on_action=ACTION_TEMP_CONTROL_ON, off_action=ACTION_TEMP_CONTROL_OFF, temp_control=True),
+    Desc(key="main_burner", translation_key="main_burner", bit=STATUS_MAIN_BURNER, on_action=ACTION_MAIN_BURNER_ON, off_action=ACTION_MAIN_BURNER_OFF),
+    Desc(key="second_burner", translation_key="second_burner", bit=STATUS_SECOND_BURNER, on_action=ACTION_SECOND_BURNER_ON, off_action=ACTION_SECOND_BURNER_OFF),
+    Desc(key="wave", translation_key="wave", bit=STATUS_WAVE, on_action=ACTION_WAVE_ON, off_action=ACTION_WAVE_OFF),
+    Desc(key="temperature_control", translation_key="temperature_control", bit=None, on_action=ACTION_TEMP_CONTROL_ON, off_action=ACTION_TEMP_CONTROL_OFF, temp_control=True),
 )
 
 
