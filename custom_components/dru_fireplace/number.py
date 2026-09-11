@@ -4,7 +4,7 @@ from .entity import DruEntity
 
 
 class FlameHeight(DruEntity, NumberEntity):
-    _attr_name = "Flame height"
+    _attr_translation_key = "flame_height"
     _attr_native_min_value = 0
     _attr_native_max_value = 100
     _attr_native_step = 1
@@ -28,7 +28,7 @@ class FlameHeight(DruEntity, NumberEntity):
 
 
 class TemperatureSetpoint(DruEntity, NumberEntity):
-    _attr_name = "Temperature setpoint control"
+    _attr_translation_key = "temperature_setpoint_control"
     _attr_native_min_value = 0
     _attr_native_max_value = 65
     _attr_native_step = 0.5
