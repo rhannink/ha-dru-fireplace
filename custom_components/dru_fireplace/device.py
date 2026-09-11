@@ -47,6 +47,7 @@ class DruFireplaceDevice:
         self._lock = asyncio.Lock()
         self._last_write = 0.0
         self._setpoint_unsupported_logged = False
+        self._setpoint_invalid_logged = False
 
     async def async_read(self) -> DruData:
         ident = await self.unit.read_holding_registers(REG_HW_TYPE, 2)
@@ -69,7 +70,20 @@ class DruFireplaceDevice:
                 self._setpoint_unsupported_logged = True
         else:
             if setpoint:
-                temperature_setpoint = setpoint[0] / 10.0
+                raw_setpoint = setpoint[0]
+                # The protocol specifies 0.5 °C steps and a scale factor of 10,
+                # therefore every valid raw setpoint must be divisible by 5.
+                # Some devices return an uninitialised/default value such as 3276;
+                # do not expose such values as a real temperature in Home Assistant.
+                if raw_setpoint % 5 == 0:
+                    temperature_setpoint = raw_setpoint / 10.0
+                    self._setpoint_invalid_logged = False
+                elif not self._setpoint_invalid_logged:
+                    _LOGGER.info(
+                        "Ignoring invalid DRU temperature setpoint raw value %s",
+                        raw_setpoint,
+                    )
+                    self._setpoint_invalid_logged = True
             self._setpoint_unsupported_logged = False
 
         return DruData(
