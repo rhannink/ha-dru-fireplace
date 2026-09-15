@@ -1,6 +1,7 @@
 # DRU Fireplace for Home Assistant
 
 Custom Home Assistant integration for a DRU/Honeywell DFGT fireplace over Modbus TCP.
+This code is generated entirely using OpenAI ChatGPT
 
 ## Installation via HACS
 
