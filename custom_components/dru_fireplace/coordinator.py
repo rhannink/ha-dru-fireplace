@@ -23,25 +23,27 @@ class DruCoordinator(DataUpdateCoordinator[DruData]):
             data = await self.device.async_read()
         except Exception as err:
             error_text = str(err).lower()
-            is_gateway_timeout = "0x0b" in error_text
+            is_transient_gateway_failure = (
+                "0x0b" in error_text
+                or "response timeout" in error_text
+                or "timed out" in error_text
+            )
 
-            # Modbus exception 0x0B means that the gateway could not get a response
-            # from its target device. The DRU RF link can occasionally do this even
-            # though the connection recovers on the next poll. Keep the last valid
-            # values for a limited number of polls instead of immediately making all
-            # Home Assistant entities unavailable.
-            if is_gateway_timeout and self.data is not None:
+            # Both Modbus exception 0x0B and a TCP/Modbus response timeout can be
+            # transient symptoms of the DRU gateway/RF target not answering in time.
+            # Keep the last valid values for a limited number of polls instead of
+            # immediately making every Home Assistant entity unavailable.
+            if is_transient_gateway_failure and self.data is not None:
                 self._transient_failures += 1
                 if self._transient_failures <= MAX_TRANSIENT_FAILURES:
                     _LOGGER.debug(
-                        "Transient DRU gateway timeout (%s/%s); keeping last valid data: %s",
+                        "Transient DRU communication failure (%s/%s); keeping last valid data: %s",
                         self._transient_failures,
                         MAX_TRANSIENT_FAILURES,
                         err,
                     )
                     return self.data
 
-            self._transient_failures = 0
             raise UpdateFailed(f"Unable to read DRU fireplace: {err}") from err
 
         self._transient_failures = 0
