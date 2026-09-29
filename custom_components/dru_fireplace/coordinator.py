@@ -1,6 +1,7 @@
 """DRU Fireplace data coordinator."""
 
 import logging
+from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -10,6 +11,7 @@ from .device import DruData, DruFireplaceDevice
 _LOGGER = logging.getLogger(__name__)
 
 MAX_TRANSIENT_FAILURES = 5
+MAX_RETRY_INTERVAL = timedelta(minutes=5)
 
 
 class DruCoordinator(DataUpdateCoordinator[DruData]):
@@ -29,17 +31,21 @@ class DruCoordinator(DataUpdateCoordinator[DruData]):
                 or "timed out" in error_text
             )
 
-            # Both Modbus exception 0x0B and a TCP/Modbus response timeout can be
-            # transient symptoms of the DRU gateway/RF target not answering in time.
-            # Keep the last valid values for a limited number of polls instead of
-            # immediately making every Home Assistant entity unavailable.
-            if is_transient_gateway_failure and self.data is not None:
+            if is_transient_gateway_failure:
                 self._transient_failures += 1
-                if self._transient_failures <= MAX_TRANSIENT_FAILURES:
+                # Let the gateway recover instead of repeating an expensive
+                # request every 30 seconds. Restore the normal cadence on success.
+                self.update_interval = min(
+                    SCAN_INTERVAL * (2 ** min(self._transient_failures, 4)),
+                    MAX_RETRY_INTERVAL,
+                )
+                if self.data is not None and self._transient_failures <= MAX_TRANSIENT_FAILURES:
                     _LOGGER.debug(
-                        "Transient DRU communication failure (%s/%s); keeping last valid data: %s",
+                        "Transient DRU communication failure (%s/%s); keeping last valid data; "
+                        "next poll in %s: %s",
                         self._transient_failures,
                         MAX_TRANSIENT_FAILURES,
+                        self.update_interval,
                         err,
                     )
                     return self.data
@@ -47,4 +53,5 @@ class DruCoordinator(DataUpdateCoordinator[DruData]):
             raise UpdateFailed(f"Unable to read DRU fireplace: {err}") from err
 
         self._transient_failures = 0
+        self.update_interval = SCAN_INTERVAL
         return data
